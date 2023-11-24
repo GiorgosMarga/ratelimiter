@@ -17,7 +17,7 @@ type RateLimiter struct {
 	Buckets     map[IP]*Bucket
 	MaxCapacity int
 	RefillTime  int  // seconds
-	RefillRate  int  // seconds
+	RefillRate  int  // tokens added
 	InfoLog     bool // for debug and dev environments
 }
 
