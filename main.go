@@ -6,15 +6,13 @@ import (
 	"time"
 )
 
-type IP string
-
 type Bucket struct {
 	Tokens int
 	sync.RWMutex
 }
 
 type RateLimiter struct {
-	Buckets     map[IP]*Bucket
+	Buckets     map[string]*Bucket
 	MaxCapacity int
 	RefillTime  int  // seconds
 	RefillRate  int  // tokens added
@@ -26,7 +24,7 @@ func NewRateLimiter(bucketCapacity, refillTime, refillRate int, infoLog bool) *R
 		fmt.Printf("RATELIMITER WARNING: Refill rate is bigger than buckets max capacity\n")
 	}
 	rl := &RateLimiter{
-		Buckets:     make(map[IP]*Bucket),
+		Buckets:     make(map[string]*Bucket),
 		MaxCapacity: bucketCapacity,
 		RefillTime:  refillTime,
 		RefillRate:  refillRate,
@@ -42,7 +40,7 @@ func (rl *RateLimiter) Refill() {
 		for key, val := range rl.Buckets {
 			val.Lock()
 			if rl.InfoLog {
-				fmt.Printf("RATELIMITER INFO %v: Bucket %s capacity %d added %d\n", time.Now().Format("15:04:05"), key, val.Tokens, rl.MaxCapacity-val.Tokens)
+				fmt.Printf("RATELIMITER INFO %v: Bucket %s capacity %d added %d\n", time.Now().Format("15:04:05"), key, val.Tokens, rl.RefillRate)
 			}
 			val.Tokens += rl.RefillRate
 			if val.Tokens > rl.MaxCapacity {
@@ -53,7 +51,7 @@ func (rl *RateLimiter) Refill() {
 	}
 }
 
-func (rl *RateLimiter) CheckRequest(ip IP) bool {
+func (rl *RateLimiter) CheckRequest(ip string) bool {
 	bucket, ok := rl.Buckets[ip]
 	if !ok {
 		// IP is new need to be added to the ratelimiter
