@@ -48,7 +48,7 @@ type Server struct {
 
 func main() {
 	bucketCapacity := 10 // Initial and Max capacity of each bucket -> 10 requests per refillTime
-	refillTime := 60     // Every 10 seconds add refillRate tokens to each bucket
+	refillTime := 60     // Every 60 seconds add refillRate tokens to each bucket
 	refillRate := 5      // Number of tokens to add to each bucket every refillTime
 	infoLog := true      // For debug and development environments
 	s := &Server{
@@ -62,7 +62,6 @@ func main() {
 
 func (s *Server) Home(w http.ResponseWriter, r *http.Request) {
 	ip := r.RemoteAddr
-	fmt.Println(ip)
 	if ok := s.Ratelimiter.CheckRequest(ip); !ok {
 		w.WriteHeader(http.StatusTooManyRequests)
 		return
